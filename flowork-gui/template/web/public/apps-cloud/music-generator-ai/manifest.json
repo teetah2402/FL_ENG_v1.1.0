@@ -1,0 +1,85 @@
+{
+  "id": "music-cover-ai",
+  "name": "Music Generator Ai",
+  "version": "2.3.0",
+  "description": "Music Generator Proprietary AI Music Core v5.0. Advanced neural synthesis with custom parameter tuning and zero-latency white-label pipeline.",
+  "author": "Flowork Neural Division",
+  "author_url": "https://flowork.cloud",
+  "category": "media_graphics",
+  "capability": "hybrid",
+  "tier": "pro",
+  "icon": "icon.svg",
+  "gui": {
+    "dashboard_enabled": true,
+    "dashboard_path": "index.html",
+    "is_standalone": true,
+    "settings": [
+      {
+        "name": "default_dna_weight",
+        "type": "number",
+        "label": "Global DNA Weight",
+        "default": 0.65
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "neural_music_gen",
+      "label": "Music Composer AI",
+      "name": "Music Composer AI",
+      "description": "Generate high-fidelity music tracks via neural pipeline.",
+      "type": "action",
+      "icon": "mdi-music-clef-treble",
+      "category": "audio_processing",
+      "inputs": [
+        {
+          "name": "prompt",
+          "label": "Musical Prompt",
+          "type": "code",
+          "placeholder": "Cheerful tropical house with melodic flute...",
+          "required": true
+        },
+        {
+          "name": "style",
+          "label": "Style Tags",
+          "type": "text",
+          "placeholder": "Happy, Uplifting, 128bpm",
+          "default": ""
+        },
+        {
+          "name": "instrumental",
+          "label": "Instrumental Mode",
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "name": "vocalGender",
+          "label": "Preferred Vocal",
+          "type": "select",
+          "options": [
+            { "label": "ALPHA (MALE)", "value": "m" },
+            { "label": "BETA (FEMALE)", "value": "f" }
+          ],
+          "default": "m"
+        }
+      ],
+      "input_ports": [
+        { "name": "trigger", "type": "signal", "label": "Start Compose" }
+      ],
+      "output_ports": [
+        { "name": "audio_output", "type": "audio", "label": "Mastered Track" },
+        { "name": "on_error", "type": "signal", "label": "On Failure" }
+      ],
+      "handler_type": "javascript"
+    }
+  ],
+  "permissions": [
+    "internet_access",
+    "neural_synthesis",
+    "custom_mode",
+    "audio_output",
+    "cloud_sync"
+  ],
+  "requires_services": ["ai_provider_manager_service"],
+  "is_paused": false
+}

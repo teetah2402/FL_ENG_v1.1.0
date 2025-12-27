@@ -1,0 +1,35 @@
+{
+  "id": "business_canvas",
+  "name": "Business Model Canvas",
+  "version": "1.1.0",
+  "description": "Interactive hybrid whiteboard for designing business models. Works Offline & Online.",
+  "author": "Flowork Dev",
+  "author_url": "https://flowork.cloud",
+  "category": "business",
+  "capability": "online",
+  "tier": "free",
+  "icon": "icon.svg",
+  "gui": {
+    "dashboard_enabled": true,
+    "dashboard_path": "index.html",
+    "is_standalone": true,
+    "settings": [
+      {
+        "name": "auto_save_interval",
+        "type": "number",
+        "label": "Auto Save (sec)",
+        "default": 30
+      }
+    ]
+  },
+
+  "nodes": [],
+  "permissions": [
+    "hybrid_save",
+    "export_png",
+    "local_storage",
+    "canvas_rendering"
+  ],
+  "requires_services": [],
+  "is_paused": false
+}

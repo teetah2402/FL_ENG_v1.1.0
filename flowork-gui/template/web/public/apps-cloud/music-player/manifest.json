@@ -1,0 +1,95 @@
+{
+  "id": "video_generator",
+  "name": "Video Generator",
+  "version": "1.0.0",
+  "description": "High-fidelity text-to-video generation engine. Create cinematic shots in 1080p with custom aspect ratios.",
+  "author": "Flowork Neural Division",
+  "author_url": "https://flowork.cloud",
+  "category": "media_graphics",
+  "capability": "hybrid",
+
+  "tier": "pro",
+  "icon": "icon.svg",
+  "gui": {
+    "dashboard_enabled": true,
+    "dashboard_path": "index.html",
+    "is_standalone": true,
+    "settings": [
+      {
+        "name": "default_resolution",
+        "type": "select",
+        "label": "Render Res",
+        "options": ["720p", "1080p", "2K", "4K"],
+        "default": "1080p"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "cine_motion_render",
+      "label": "Cine Motion Render",
+      "name": "Cine Motion Render",
+      "description": "Generate cinematic video clips from text descriptions.",
+      "type": "action",
+      "icon": "icon.svg",
+      "category": "video_processing",
+      "inputs": [
+        {
+          "name": "prompt",
+          "label": "Scene Description",
+          "type": "code",
+          "placeholder": "Describe the lighting, motion, and subject...",
+          "required": true
+        },
+        {
+          "name": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            { "label": "16:9 Cinema", "value": "landscape" },
+            { "label": "9:16 Vertical", "value": "portrait" }
+          ],
+          "default": "landscape"
+        },
+        {
+          "name": "n_frames",
+          "label": "Clip Length",
+          "type": "select",
+          "options": [
+            { "label": "10 Seconds", "value": "10" },
+            { "label": "15 Seconds", "value": "15" }
+          ],
+          "default": "10"
+        },
+        {
+          "name": "size",
+          "label": "Render Quality",
+          "type": "select",
+          "options": [
+            { "label": "Ultra High", "value": "high" },
+            { "label": "Standard", "value": "standard" }
+          ],
+          "default": "high"
+        }
+      ],
+      "input_ports": [
+        { "name": "trigger", "type": "signal", "label": "Start Render" }
+      ],
+      "output_ports": [
+        { "name": "video_url", "type": "string", "label": "Video Link" },
+        { "name": "on_complete", "type": "signal", "label": "Done" }
+      ],
+      "handler_type": "javascript"
+    }
+  ],
+
+  "permissions": [
+    "internet_access",
+    "video_render",
+    "gpu_acceleration",
+    "filesystem_access",
+    "background_task"
+  ],
+  "requires_services": ["ai_provider_manager_service"],
+  "is_paused": false
+}

@@ -1,0 +1,82 @@
+{
+  "id": "universal_downloader",
+  "name": "Neural Downloader Pro",
+  "version": "3.0.0",
+  "description": "Tactical stream ingestion engine with multi-format neural fetching and VRAM isolation.",
+  "author": "Flowork Cyber Division",
+  "author_url": "https://flowork.cloud",
+  "category": "tools",
+  "capability": "offline",
+  "tier": "architect",
+  "icon": "mdi-shield-sync",
+  "gui": {
+    "dashboard_enabled": true,
+    "dashboard_path": "index.html",
+    "is_standalone": true,
+    "settings": [
+      {
+        "name": "max_concurrent_downloads",
+        "type": "number",
+        "label": "Max Concurrent",
+        "default": 3
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "neural_fetcher",
+      "label": "Neural Downloader",
+      "name": "Neural Downloader",
+      "description": "Download media from URL using advanced neural fetching.",
+      "type": "action",
+      "icon": "mdi-download-network-outline",
+      "category": "ingestion",
+      "handler_type": "python",
+      "python_handler": "backend.node:DownloaderNode",
+      "inputs": [
+        {
+          "name": "url",
+          "label": "Target URL",
+          "type": "text",
+          "placeholder": "https://...",
+          "required": true,
+          "default": ""
+        },
+        {
+          "name": "format_mode",
+          "label": "Format Mode",
+          "type": "select",
+          "options": [
+            { "label": "Maximum Fidelity", "value": "best" },
+            { "label": "Fixed MP4 Container", "value": "video_only" },
+            { "label": "Extract MP3 Neural", "value": "audio_mp3" }
+          ],
+          "default": "best"
+        },
+        {
+          "name": "output_dir",
+          "label": "Output Directory",
+          "type": "text",
+          "placeholder": "/path/to/save",
+          "required": true,
+          "default": ""
+        }
+      ],
+      "input_ports": [
+        { "name": "trigger", "type": "signal" }
+      ],
+      "output_ports": [
+        { "name": "on_complete", "type": "signal", "label": "Completed" },
+        { "name": "on_error", "type": "signal", "label": "Failed" }
+      ]
+    }
+  ],
+  "permissions": [
+    "stream_ingestion",
+    "vram_isolation",
+    "filesystem_access",
+    "network_access"
+  ],
+  "requires_services": [],
+  "is_paused": false
+}

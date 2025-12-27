@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #050505;
+            --panel: rgba(15, 15, 20, 0.95);
+            --accent: #ff3333; /* Cinematic Red */
+            --secondary: #ffffff;
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-dim: #888888;
+        }
+
+        * { box-sizing: border-box; outline: none; }
+        body {
+            margin: 0; padding: 20px; font-family: 'Inter', sans-serif;
+            background: var(--bg); color: var(--text-main); height: 100vh; overflow: hidden;
+            background-image: radial-gradient(circle at 50% 0%, rgba(255, 51, 51, 0.1), transparent 60%);
+        }
+
+        /* Header Animation */
+        .v-header { display: flex; align-items: flex-end; gap: 4px; height: 24px; margin-bottom: 20px; }
+        .v-bar { width: 4px; height: 5px; background: var(--accent); border-radius: 10px; animation: bounce 1.2s infinite ease-in-out; }
+        .v-bar:nth-child(odd) { background: var(--secondary); animation-delay: 0.2s; }
+        @keyframes bounce { 0%, 100% { height: 5px; } 50% { height: 24px; } }
+
+        .container { display: grid; grid-template-columns: 350px 1fr; gap: 20px; height: calc(100vh - 100px); }
+        .panel {
+            background: var(--panel); border: 1px solid var(--border); border-radius: 20px;
+            padding: 24px; overflow-y: auto; display: flex; flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        label { display: block; font-size: 0.65rem; color: var(--text-dim); margin-bottom: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+
+        textarea, select, input {
+            width: 100%; background: #000; border: 1px solid #333; border-radius: 12px;
+            color: #fff; padding: 12px; font-size: 0.85rem; transition: 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+        textarea:focus, select:focus { border-color: var(--accent); }
+        textarea#prompt { min-height: 120px; resize: none; line-height: 1.5; }
+
+        .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+
+        .btn-gen {
+            width: 100%; padding: 16px; border-radius: 12px; border: none;
+            background: linear-gradient(135deg, var(--accent), #990000);
+            color: #fff; font-family: 'Orbitron'; font-weight: 800; font-size: 0.9rem;
+            cursor: pointer; margin-top: 20px; transition: 0.3s; letter-spacing: 1px;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-gen:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(255, 51, 51, 0.4); }
+        .btn-gen:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* Video List */
+        .video-card {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            border-radius: 16px; margin-bottom: 20px; overflow: hidden;
+            animation: slideIn 0.4s ease-out;
+        }
+        .video-header {
+            padding: 15px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .status-badge {
+            font-size: 0.6rem; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase;
+        }
+        .status-waiting { background: rgba(255, 165, 0, 0.2); color: orange; }
+        .status-success { background: rgba(0, 255, 127, 0.2); color: #00ff7f; }
+        .status-fail { background: rgba(255, 0, 0, 0.2); color: #ff4444; }
+
+        .video-content { padding: 0; position: relative; min-height: 100px; display: flex; align-items: center; justify-content: center; background: #000; }
+        video { width: 100%; display: block; }
+
+        .loading-pulse { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s infinite linear; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .download-btn {
+            display: block; width: 100%; padding: 12px; background: #111; color: var(--text-dim);
+            text-align: center; font-size: 0.7rem; font-weight: bold; text-decoration: none;
+            border-top: 1px solid var(--border); transition: 0.2s;
+        }
+        .download-btn:hover { background: var(--accent); color: white; }
+
+        /* [OBSOLETE] Fixed space syntax error on scrollbar identifiers */
+        /* :: -webkit-scrollbar { width: 4px; } */
+        /* :: -webkit-scrollbar-thumb { background: #333; border-radius: 10px; } */
+
+        /* [ADDED] Corrected CSS scrollbar syntax */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div class="v-header">
+                <div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div>
+            </div>
+            <h1 style="font-family:'Orbitron'; font-size: 1.4rem; margin:0; letter-spacing:2px; font-weight:900;">CINEMATIC <span style="color:var(--accent)">MOTION</span></h1>
+        </div>
+        <div id="engineLabel" style="font-size:0.6rem; color:var(--text-dim); border:1px solid #333; padding:5px 10px; border-radius:20px;">
+            <i data-lucide="zap" style="width:12px; vertical-align:middle"></i> PRO_ENGINE_READY
+        </div>
+    </div>
+
+    <div class="container" style="margin-top: 20px;">
+        <div class="panel">
+            <label><i data-lucide="edit-3" style="width:12px"></i> SCENE DESCRIPTION</label>
+            <textarea id="prompt" placeholder="Describe the scene in detail..."></textarea>
+
+            <div class="param-grid">
+                <div>
+                    <label><i data-lucide="monitor" style="width:12px"></i> RATIO</label>
+                    <select id="aspect_ratio">
+                        <option value="landscape" selected>16:9 (Cinema)</option>
+                        <option value="portrait">9:16 (Vertical)</option>
+                    </select>
+                </div>
+                <div>
+                    <label><i data-lucide="clock" style="width:12px"></i> LENGTH</label>
+                    <select id="n_frames">
+                        <option value="10">10 Seconds</option>
+                        <option value="15">15 Seconds</option>
+                    </select>
+                </div>
+                <div>
+                    <label><i data-lucide="layers" style="width:12px"></i> QUALITY</label>
+                    <select id="size">
+                        <option value="high" selected>Ultra High</option>
+                        <option value="standard">Standard</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn-gen" id="btnRun" onclick="generateVideo()">
+                <i data-lucide="clapperboard"></i> RENDER SCENE
+            </button>
+        </div>
+
+        <div class="panel">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center">
+                <label style="margin:0">OUTPUT STREAM</label>
+                <button onclick="purge()" style="background:none; border:none; color:#555; font-size:0.6rem; cursor:pointer;">CLEAR ALL</button>
+            </div>
+            <div id="videoList"></div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'cine_motion_history_v1';
+        let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const MOCK_USER = "0xF39733B34131c13E35733E9Af1adD78a5e768929";
+
+        window.onload = () => {
+            lucide.createIcons();
+            render();
+            startPolling();
+
+            /* [ADDED] Hybrid Sync: Listen for Node Data from Flowork GUI */
+            window.addEventListener('message', (event) => {
+                if (event.data.type === 'CMD_LOAD') {
+                    handleHybridLoad(event.data.payload);
+                }
+            });
+        };
+
+        /* [ADDED] Logic to map Workflow Node settings to Dashboard UI */
+        function handleHybridLoad(payload) {
+            if (!payload) return;
+            document.getElementById('prompt').value = payload.prompt || '';
+            document.getElementById('aspect_ratio').value = payload.aspect_ratio || 'landscape';
+            document.getElementById('n_frames').value = payload.n_frames || '10';
+            document.getElementById('size').value = payload.size || 'high';
+            document.getElementById('engineLabel').innerHTML = `<i data-lucide="link" style="width:12px"></i> NODE_CONTEXT_ACTIVE`;
+            document.getElementById('engineLabel').style.color = "var(--accent)";
+            lucide.createIcons();
+        }
+
+        async function generateVideo() {
+            const prompt = document.getElementById('prompt').value.trim();
+            if (!prompt) return alert("Please enter a scene description.");
+            const btn = document.getElementById('btnRun');
+            const user = localStorage.getItem('flowork_wallet') || MOCK_USER;
+
+            btn.disabled = true;
+            btn.innerHTML = 'INITIALIZING RENDER...';
+
+            try {
+                const payload = {
+                    action: 'create',
+                    user_address: user,
+                    prompt: prompt,
+                    aspect_ratio: document.getElementById('aspect_ratio').value,
+                    n_frames: document.getElementById('n_frames').value,
+                    size: document.getElementById('size').value
+                };
+
+                /* [ADDED] Notify Core to save state for persistence */
+                window.parent.postMessage({ type: 'APP_SAVE_REQUEST', payload: { data: payload } }, '*');
+
+                const res = await fetch('/api/v1/ai/sora_video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.code !== 200) throw new Error(data.msg || data.error || "Generation Failed");
+
+                tasks.unshift({
+                    id: data.data.taskId,
+                    prompt: prompt,
+                    status: 'waiting',
+                    timestamp: Date.now(),
+                    videoUrl: null
+                });
+
+                save(); render();
+                document.getElementById('prompt').value = "";
+            } catch (e) {
+                alert("Error: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="clapperboard"></i> RENDER SCENE';
+                lucide.createIcons();
+            }
+        }
+
+        function startPolling() {
+            setInterval(async () => {
+                const active = tasks.filter(t => t.status === 'waiting');
+                if (!active.length) return;
+                const user = localStorage.getItem('flowork_wallet') || MOCK_USER;
+                for (let t of active) {
+                    try {
+                        const res = await fetch('/api/v1/ai/sora_video', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'check_status', taskId: t.id, user_address: user })
+                        });
+                        const d = await res.json();
+                        if(d.code !== 200) continue;
+                        const state = d.data?.state;
+                        if (state === 'success') {
+                            const resultObj = JSON.parse(d.data.resultJson);
+                            if (resultObj.resultUrls && resultObj.resultUrls.length > 0) {
+                                t.status = 'success';
+                                t.videoUrl = resultObj.resultUrls[0];
+                                save(); render();
+                            }
+                        } else if (state === 'fail') {
+                            t.status = 'fail';
+                            t.errorMsg = d.data?.failMsg || "Unknown Error";
+                            save(); render();
+                        }
+                    } catch (e) {}
+                }
+            }, 5000);
+        }
+
+        function render() {
+            const container = document.getElementById('videoList');
+            container.innerHTML = tasks.length ? '' : '<div style="text-align:center; padding:40px; color:#444; font-size:0.8rem;">NO RENDER HISTORY</div>';
+            tasks.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                let content = '';
+                let badgeClass = '';
+                if (t.status === 'waiting') {
+                    badgeClass = 'status-waiting';
+                    content = `<div class="video-content"><div class="loading-pulse"></div></div>`;
+                } else if (t.status === 'success') {
+                    badgeClass = 'status-success';
+                    content = `<div class="video-content"><video src="${t.videoUrl}" controls preload="metadata"></video></div><a href="${t.videoUrl}" target="_blank" class="download-btn" download>DOWNLOAD MP4</a>`;
+                } else {
+                    badgeClass = 'status-fail';
+                    content = `<div class="video-content" style="color:#ff4444; font-size:0.7rem; flex-direction:column; gap:5px;"><i data-lucide="alert-triangle"></i> FAILED</div>`;
+                }
+                card.innerHTML = `<div class="video-header"><div style="font-size:0.7rem; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; color:#fff;" title="${t.prompt}">${t.prompt.toUpperCase()}</div><div class="status-badge ${badgeClass}">${t.status}</div></div>${content}`;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks.slice(0, 10))); }
+        function purge() { if(confirm("Clear history?")) { tasks=[]; save(); render(); } }
+    </script>
+</body>
+</html>

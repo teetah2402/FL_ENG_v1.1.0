@@ -1,0 +1,16 @@
+{
+    "id": "Video-Generator",
+    "name": "Video Generator",
+    "version": "1.0.0",
+    "description": "High-fidelity text-to-video generation engine. Create cinematic shots in 1080p with custom aspect ratios.",
+    "author": "Flowork Neural Division",
+    "tier": "pro",
+    "type": "apps",
+    "entry_point": "index.html",
+    "icon_file": "icon.svg",
+    "default_width": 10,
+    "default_height": 12,
+    "tags": ["video", "ai", "cinematic", "motion", "render"],
+    "slug": "cine_motion",
+    "capabilities": ["internet_access", "video_render", "gpu_acceleration"]
+}

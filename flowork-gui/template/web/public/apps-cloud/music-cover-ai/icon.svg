@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="coverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00f3ff" />
+      <stop offset="100%" style="stop-color:#bc13fe" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#030305"/>
+  <path d="M12,32 Q22,12 32,32 T52,32" fill="none" stroke="#fff" stroke-width="2" opacity="0.3"/>
+  <path d="M12,32 Q22,52 32,32 T52,32" fill="none" stroke="url(#coverGrad)" stroke-width="3">
+    <animate attributeName="stroke-dasharray" from="0,100" to="100,0" dur="2s" repeatCount="indefinite" />
+  </path>
+  <circle cx="32" cy="32" r="6" fill="url(#coverGrad)" />
+</svg>

@@ -1,0 +1,85 @@
+{
+  "id": "neural_cover",
+  "name": "Music Cover Ai",
+  "version": "2.8.0",
+  "description": "Premium melody preservation engine. Advanced audio-to-audio neural synthesis for authorized operators.",
+  "author": "Flowork Neural Division",
+  "author_url": "https://flowork.cloud",
+  "category": "media_graphics",
+  "capability": "hybrid",
+  "tier": "pro",
+  "icon": "icon.svg",
+  "gui": {
+    "dashboard_enabled": true,
+    "dashboard_path": "index.html",
+    "is_standalone": true,
+    "settings": [
+      {
+        "name": "default_model",
+        "type": "select",
+        "label": "Neural Model",
+        "options": ["V4", "V45ALL", "V5"],
+        "default": "V5"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "neural_synthesis_action",
+      "label": "Neural Synthesis",
+      "name": "Neural Synthesis",
+      "description": "Transform source audio into a new vocal profile using AI.",
+      "type": "action",
+      "icon": "mdi-waveform",
+      "category": "audio_processing",
+      "inputs": [
+        {
+          "name": "prompt",
+          "label": "Neural Lyrics/Vibe",
+          "type": "code",
+          "placeholder": "Describe the transformation or paste lyrics...",
+          "required": true
+        },
+        {
+          "name": "vocalGender",
+          "label": "Vocal Profile",
+          "type": "select",
+          "options": [
+            { "label": "ALPHA (MALE)", "value": "m" },
+            { "label": "BETA (FEMALE)", "value": "f" }
+          ],
+          "default": "m"
+        },
+        {
+          "name": "instrumental",
+          "label": "Instrumental Only",
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "name": "style",
+          "label": "Style Override",
+          "type": "text",
+          "placeholder": "Jazz, Cyberpunk, etc."
+        }
+      ],
+      "input_ports": [
+        { "name": "audio_in", "type": "audio", "label": "Source Audio" }
+      ],
+      "output_ports": [
+        { "name": "audio_out", "type": "audio", "label": "Generated Audio" },
+        { "name": "error", "type": "signal", "label": "On Error" }
+      ],
+      "handler_type": "javascript"
+    }
+  ],
+
+  "permissions": [
+    "audio_upload",
+    "neural_synthesis",
+    "cloud_sync",
+    "filesystem_access"
+  ],
+  "requires_services": ["ai_provider_manager_service"],
+  "is_paused": false
+}

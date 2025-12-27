@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <style>
+    /* 1. Animasi Aliran Data (Flow) - Dipercepat dikit biar lincah */
+    .flow-stream {
+      stroke-dasharray: 10 30;
+      stroke-dashoffset: 40;
+      animation: streamFlow 1.5s linear infinite;
+    }
+
+    @keyframes streamFlow {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    /* 2. Animasi Denyut Nadi (Pulse) - Lebih Intens */
+    .node-pulse {
+      animation: pulse 2s ease-in-out infinite;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+
+    @keyframes pulse {
+      0%, 100% { r: 3; opacity: 0.6; filter: drop-shadow(0 0 4px #00f5ff); }
+      50% { r: 5; opacity: 1; filter: drop-shadow(0 0 12px #bc13fe); }
+    }
+  </style>
+
+  <defs>
+    <linearGradient id="flowork_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00ffff;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#bc13fe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff00ff;stop-opacity:1" />
+    </linearGradient>
+
+    <filter id="outer-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <rect x="2" y="2" width="60" height="60" rx="16"
+        fill="rgba(255, 255, 255, 0.08)"
+        stroke="url(#flowork_grad)"
+        stroke-width="2"
+        stroke-opacity="1"
+        style="filter: drop-shadow(0 0 5px rgba(188, 19, 254, 0.4));"/>
+
+  <g stroke="rgba(0, 245, 255, 0.3)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 50 V 24 Q 22 14 32 14 H 46" />
+    <path d="M22 32 H 40" />
+  </g>
+
+  <g filter="url(#outer-glow)">
+    <path class="flow-stream" d="M22 50 V 24 Q 22 14 32 14 H 46"
+          stroke="url(#flowork_grad)"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+
+    <path class="flow-stream" d="M22 32 H 40"
+          stroke="url(#flowork_grad)"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="animation-delay: 0.7s; animation-direction: reverse;" />
+  </g>
+
+  <g>
+    <circle cx="22" cy="50" r="3" fill="#00ffff" class="node-pulse" style="animation-delay: 0s;" />
+    <circle cx="46" cy="14" r="3" fill="#ff00ff" class="node-pulse" style="animation-delay: 0.5s;" />
+    <circle cx="40" cy="32" r="3" fill="#ffffff" class="node-pulse" style="animation-delay: 1s;" />
+  </g>
+</svg>

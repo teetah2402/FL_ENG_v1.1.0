@@ -1,0 +1,101 @@
+[{
+    "id": "music-generator-ai",
+    "type": "apps",
+    "path": "music-generator-ai",
+    "slug": "music-generator-ai",
+    "name": "Music Generator Ai",
+    "manifest_file": "manifest.json",
+    "seo": {
+      "title": "Music Generator - AI Music Generator | Flowork",
+      "description": "Create professional soundtracks and music tracks instantly with AI. No copyright issues, perfect for creators.",
+      "keywords": ["ai music", "suno generator", "music creator", "soundtrack ai"],
+      "og_image": "/apps-cloud/music-generator-ai/icon.svg"
+    },
+    "last_updated": "2025-12-18"
+  },{
+    "id": "music-cover-ai",
+    "type": "apps",
+    "path": "music-cover-ai",
+    "slug": "music-cover-ai",
+    "name": "Music Cover Ai",
+    "manifest_file": "manifest.json",
+    "seo": {
+      "title": "Music Cover Ai - AI Audio Transformation | Flowork",
+      "description": "Cover any audio track with a new style while preserving melody. Powered by Flowork Neural Core.",
+      "og_image": "/apps-cloud/music-cover-ai/icon.svg"
+    },
+    "last_updated": "2025-12-18"
+},{
+    "id": "Video-Generator",
+    "type": "apps",
+    "path": "Video-Generator",
+    "slug": "Video-Generator",
+    "name": "Video Generator",
+    "manifest_file": "manifest.json",
+    "seo": {
+      "title": "Cinematic Motion Pro - High-Fidelity AI Video Engine | Flowork",
+      "description": "Generate professional cinematic videos from text prompts. Features high-fidelity rendering, custom aspect ratios (16:9, 9:16), and zero-watermark output.",
+      "keywords": ["text to video", "ai video generator", "cinematic ai", "motion engine", "video renderer", "no watermark"],
+      "og_image": "/apps-cloud/Video-Generator/icon.svg"
+    },
+    "last_updated": "2025-12-18"
+},{
+    "id": "video-player",
+    "type": "apps",
+    "path": "video-player",
+    "slug": "video-player",
+    "name": "Video Player",
+    "manifest_file": "manifest.json",
+    "seo": {
+      "title": "Video Player- Offline Web VIDEO Player with 3D Visualizer | Flowork",
+      "description": "Tactical video operations terminal. Zero-upload local player with folder access and neural sync.",
+      "keywords": ["web video player", "video player online", "audio visualizer", "offline video", "cyberpunk player"],
+      "og_image": "/apps-cloud/video-player/icon.svg"
+    },
+    "last_updated": "2025-12-18"
+  },
+  {
+    "id": "music-player",
+    "type": "apps",
+    "path": "music-player",
+    "slug": "music-player",
+    "name": "MUSIC PLAYER",
+    "manifest_file": "manifest.json",
+    "seo": {
+      "title": "NeonFlow - Offline Web Music Player with 3D Visualizer | Flowork",
+      "description": "Play local MP3/FLAC files directly in your browser with a cyberpunk visualizer. Zero server upload, 100% privacy, works offline like Winamp.",
+      "keywords": ["web music player", "mp3 player online", "audio visualizer", "offline music", "cyberpunk player"],
+      "og_image": "/apps-cloud/music-player/icon.svg"
+    },
+    "last_updated": "2025-12-18"
+  },
+  {
+    "id": "business_canvas",
+    "type": "apps",
+    "path": "business_canvas",
+    "slug": "business-model-canvas",
+    "name": "Business Model Canvas",
+    "manifest_file": "manifest.json",
+    "seo": {
+      "title": "Free Business Model Canvas Generator (BMC) - Export to PNG | Flowork",
+      "description": "Create professional Business Model Canvas online. Hybrid save feature allows offline editing. Export to High-Quality PNG or JSON backup. Free for startups.",
+      "keywords": ["business model canvas", "bmc template", "startup tools", "business plan generator"],
+      "og_image": "/apps-cloud/business_canvas/icon.svg"
+    },
+    "last_updated": "2025-12-18"
+  },{
+    "id": "world_clock",
+    "type": "apps",
+    "path": "world_clock",
+    "slug": "world-clock",
+    "name": "World Clock",
+    "manifest_file": "manifest.json",
+    "seo": {
+      "title": "World Clock - Timezone Converter & Planner | Flowork",
+      "description": "Track time across multiple cities instantly. The best free online world clock apps for remote workers and digital nomads. No ads, offline ready.",
+      "keywords": ["world clock", "timezone converter", "time apps", "productivity tool"],
+      "og_image": "/apps-cloud/world_clock/promo.svg"
+    },
+    "last_updated": "2025-12-18"
+  }
+]

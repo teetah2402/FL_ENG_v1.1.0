@@ -1,0 +1,23 @@
+{
+  "id": "flowork_architect",
+  "name": "Flowork Cortex",
+  "version": "2.0.0",
+  "description": "Neural Architecture Mapper & Zombie File Hunter",
+  "author": "Flowork Inc.",
+  "category": "developer_tools",
+  "capability": "offline",
+  "icon": "icon.svg",
+  "permissions": [
+    "filesystem",
+    "core_access"
+  ],
+  "gui": {
+    "dashboard_enabled": true,
+    "dashboard_path": "index.html",
+    "is_standalone": true,
+    "settings": []
+  },
+  "nodes": [],
+  "requires_services": [],
+  "is_paused": false
+}

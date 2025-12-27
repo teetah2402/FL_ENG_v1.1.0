@@ -1,0 +1,40 @@
+{
+  "id": "world_clock",
+  "name": "World Clock",
+  "version": "1.0.0",
+  "description": "Global Ops Time Tracking. Synchronize your tactical operations across multiple time zones.",
+  "author": "Flowork Dev",
+  "author_url": "https://flowork.cloud",
+  "category": "productivity",
+  "capability": "online",
+  "tier": "free",
+  "icon": "icon.svg",
+  "gui": {
+    "dashboard_enabled": true,
+    "dashboard_path": "index.html",
+    "is_standalone": true,
+    "settings": [
+      {
+        "name": "default_format",
+        "type": "select",
+        "label": "Time Format",
+        "options": ["24h", "12h"],
+        "default": "24h"
+      },
+      {
+        "name": "show_seconds",
+        "type": "boolean",
+        "label": "Show Seconds",
+        "default": true
+      }
+    ]
+  },
+  "nodes": [],
+  "permissions": [
+    "local_time_access",
+    "timezone_detection",
+    "offline_ready"
+  ],
+  "requires_services": [],
+  "is_paused": false
+}

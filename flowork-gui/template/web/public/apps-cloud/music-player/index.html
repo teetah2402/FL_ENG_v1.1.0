@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeonFlow Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --glass-bg: rgba(20, 20, 30, 0.8);
+            --glass-border: rgba(0, 255, 204, 0.3);
+            --neon-primary: #00ffcc; /* Cyan Modern */
+            --neon-secondary: #ff00ff; /* Magenta Accent */
+            --text-main: #ffffff;
+            --text-dim: #8899aa;
+            --active-bg: rgba(0, 255, 204, 0.15);
+        }
+
+        * { box-sizing: border-box; outline: none; user-select: none; }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Rajdhani', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(0, 255, 204, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 255, 0.05) 0%, transparent 40%);
+        }
+
+        /* --- PLAYER CONTAINER --- */
+        .player-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.1);
+            overflow: hidden;
+        }
+
+        /* --- HEADER & VISUALIZER --- */
+        .top-section {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+            position: relative;
+        }
+
+        .now-playing {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--neon-primary);
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .status-text {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        canvas {
+            width: 100%;
+            height: 80px;
+            margin-top: 15px;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.3);
+        }
+
+        /* --- CONTROLS --- */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid var(--text-dim);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            border-color: var(--neon-primary);
+            color: var(--neon-primary);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+
+        .btn.active {
+            background: var(--active-bg);
+            border-color: var(--neon-secondary);
+            color: var(--neon-secondary);
+        }
+
+        .btn-main {
+            width: 50px;
+            height: 50px;
+            border-color: var(--neon-primary);
+            color: var(--neon-primary);
+            font-size: 1.2rem;
+        }
+
+        /* --- FOLDER IMPORT BUTTON --- */
+        .import-section {
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .file-btn {
+            background: rgba(0, 255, 204, 0.1);
+            border: 1px dashed var(--neon-primary);
+            color: var(--neon-primary);
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-btn:hover {
+            background: rgba(0, 255, 204, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+        }
+
+        /* --- PLAYLIST --- */
+        .playlist {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .track {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+            border-radius: 4px;
+        }
+
+        .track:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .track.active {
+            background: linear-gradient(90deg, rgba(0, 255, 204, 0.1), transparent);
+            border-left: 3px solid var(--neon-primary);
+        }
+
+        .track-name {
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 85%;
+        }
+
+        .track-time {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-primary); }
+
+    </style>
+</head>
+<body>
+
+    <div class="player-wrapper">
+        <div class="top-section">
+            <div class="now-playing" id="trackTitle">NO MEDIA SELECTED</div>
+            <div class="status-text" id="statusText">Select a folder to begin</div>
+            <canvas id="visualizer"></canvas>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="prevTrack()">⏮</button>
+            <button class="btn btn-main" onclick="togglePlay()" id="btnPlay">▶</button>
+            <button class="btn" onclick="nextTrack()">⏭</button>
+            <button class="btn" onclick="toggleShuffle()" id="btnShuffle" title="Shuffle">🔀</button>
+            <button class="btn" onclick="toggleRepeat()" id="btnRepeat" title="Repeat">🔁</button>
+        </div>
+
+        <div class="import-section">
+            <label class="file-btn">
+                📂 LOAD MUSIC FOLDER
+                <input type="file" id="folderInput" webkitdirectory directory multiple style="display: none;" onchange="handleFolderSelect(this)">
+            </label>
+        </div>
+
+        <div class="playlist" id="playlist">
+            </div>
+    </div>
+
+    <audio id="audioPlayer" crossorigin="anonymous"></audio>
+
+    <script>
+        // --- CORE VARIABLES ---
+        const audio = document.getElementById('audioPlayer');
+        const trackTitle = document.getElementById('trackTitle');
+        const statusText = document.getElementById('statusText');
+        const btnPlay = document.getElementById('btnPlay');
+        const playlistContainer = document.getElementById('playlist');
+
+        let playlist = []; // Array of { name, fileObj }
+        let currentIndex = 0;
+        let isPlaying = false;
+        let isShuffle = false;
+        let isRepeat = false;
+
+        // --- AUDIO CONTEXT (Visualizer) ---
+        let audioCtx, analyser, source;
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                source = audioCtx.createMediaElementSource(audio);
+                source.connect(analyser);
+                analyser.connect(audioCtx.destination);
+                analyser.fftSize = 64; // Low res for retro look
+                drawVisualizer();
+            }
+        }
+
+        // --- FOLDER HANDLING (OFFLINE MAGIC) ---
+        function handleFolderSelect(input) {
+            const files = Array.from(input.files);
+
+            // Filter audio files only
+            const audioFiles = files.filter(f =>
+                f.name.toLowerCase().endsWith('.mp3') ||
+                f.name.toLowerCase().endsWith('.wav') ||
+                f.name.toLowerCase().endsWith('.ogg') ||
+                f.name.toLowerCase().endsWith('.flac')
+            );
+
+            if (audioFiles.length === 0) {
+                statusText.innerText = "No music files found.";
+                return;
+            }
+
+            // Sort alphabetically
+            audioFiles.sort((a, b) => a.name.localeCompare(b.name));
+
+            // Build Playlist
+            playlist = audioFiles.map(f => ({
+                name: f.name.replace(/\.[^/.]+$/, ""), // Remove extension
+                fileObj: f
+            }));
+
+            renderPlaylist();
+            statusText.innerText = `${playlist.length} tracks loaded. Ready.`;
+
+            // Auto play first
+            loadTrack(0);
+        }
+
+        // --- PLAYLIST UI ---
+        function renderPlaylist() {
+            playlistContainer.innerHTML = '';
+            playlist.forEach((track, index) => {
+                const div = document.createElement('div');
+                div.className = `track ${index === currentIndex ? 'active' : ''}`;
+                div.innerHTML = `
+                    <span class="track-name">${index + 1}. ${track.name}</span>
+                    <span class="track-time">LOCAL</span>
+                `;
+                div.onclick = () => {
+                    currentIndex = index;
+                    loadTrack(index);
+                    playAudio();
+                };
+                playlistContainer.appendChild(div);
+            });
+        }
+
+        // --- PLAYER LOGIC ---
+        function loadTrack(index) {
+            if (playlist.length === 0) return;
+
+            // Initialize AudioContext on first interaction
+            initAudioContext();
+
+            const track = playlist[index];
+
+            // Create Blob URL from local file object
+            const fileUrl = URL.createObjectURL(track.fileObj);
+
+            audio.src = fileUrl;
+            audio.load();
+
+            trackTitle.innerText = track.name;
+            statusText.innerText = "Playing Local File...";
+
+            // Update UI Highlight
+            document.querySelectorAll('.track').forEach((el, i) => {
+                el.classList.toggle('active', i === index);
+            });
+        }
+
+        function playAudio() {
+            if (playlist.length === 0) return;
+            audio.play().then(() => {
+                isPlaying = true;
+                btnPlay.innerText = "⏸";
+                statusText.innerText = "Playing...";
+            }).catch(e => console.error("Play error:", e));
+        }
+
+        function pauseAudio() {
+            audio.pause();
+            isPlaying = false;
+            btnPlay.innerText = "▶";
+            statusText.innerText = "Paused";
+        }
+
+        function togglePlay() {
+            if (isPlaying) pauseAudio();
+            else playAudio();
+        }
+
+        function nextTrack() {
+            if (playlist.length === 0) return;
+
+            if (isShuffle) {
+                currentIndex = Math.floor(Math.random() * playlist.length);
+            } else {
+                currentIndex = (currentIndex + 1) % playlist.length;
+            }
+            loadTrack(currentIndex);
+            playAudio();
+        }
+
+        function prevTrack() {
+            if (playlist.length === 0) return;
+            currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+            loadTrack(currentIndex);
+            playAudio();
+        }
+
+        // --- BUTTONS LOGIC ---
+        function toggleShuffle() {
+            isShuffle = !isShuffle;
+            document.getElementById('btnShuffle').classList.toggle('active', isShuffle);
+        }
+        function toggleRepeat() {
+            isRepeat = !isRepeat;
+            document.getElementById('btnRepeat').classList.toggle('active', isRepeat);
+        }
+
+        // --- EVENTS ---
+        audio.addEventListener('ended', () => {
+            if (isRepeat) {
+                audio.currentTime = 0;
+                playAudio();
+            } else {
+                nextTrack();
+            }
+        });
+
+        // --- VISUALIZER LOOP ---
+        function drawVisualizer() {
+            requestAnimationFrame(drawVisualizer);
+            if (!analyser) return;
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const barWidth = (canvas.width / bufferLength) * 2.5;
+            let barHeight;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                barHeight = dataArray[i] / 255 * canvas.height;
+
+                // Gradient: Cyan to Purple
+                const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
+                gradient.addColorStop(0, '#00ffcc');
+                gradient.addColorStop(1, '#ff00ff');
+
+                ctx.fillStyle = gradient;
+
+                // Cyberpunk Rounded Bars
+                ctx.beginPath();
+                ctx.roundRect(x, canvas.height - barHeight, barWidth, barHeight, [2, 2, 0, 0]);
+                ctx.fill();
+
+                x += barWidth + 2;
+            }
+        }
+    </script>
+</body>
+</html>

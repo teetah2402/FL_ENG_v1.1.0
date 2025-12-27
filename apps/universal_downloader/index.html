@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Downloader - Batch Sequence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-core: #050505; --bg-panel: rgba(10, 15, 20, 0.95);
+            --neon-cyan: #00f3ff; --neon-purple: #bc13fe; --neon-green: #00ff66; --neon-alert: #ff0055;
+            --text-main: #e0f0ff; --glass-border: 1px solid rgba(0, 243, 255, 0.3);
+        }
+        * { box-sizing: border-box; outline: none; }
+        body {
+            margin: 0; background: var(--bg-core); color: var(--text-main);
+            font-family: 'Rajdhani', sans-serif; overflow: hidden; user-select: none;
+        }
+        .top-bar {
+            height: 50px; background: rgba(0,0,0,0.8); border-bottom: var(--glass-border);
+            display: flex; align-items: center; padding: 0 20px; justify-content: space-between;
+        }
+        .brand { font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px; color: var(--neon-cyan); }
+        .main-layout { display: grid; grid-template-columns: 320px 1fr; height: calc(100vh - 50px); }
+        .control-panel { background: var(--bg-panel); border-right: var(--glass-border); padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .cyber-input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 10px; color: white; font-family: 'JetBrains Mono'; border-radius: 4px; }
+        .picker-group { display: flex; gap: 5px; }
+        .btn-icon { background: #222; border: 1px solid #444; color: var(--neon-cyan); cursor: pointer; padding: 10px; border-radius: 4px; }
+        .btn-icon:hover { background: var(--neon-cyan); color: black; }
+        .execute-btn {
+            background: none; border: 2px solid var(--neon-cyan); color: var(--neon-cyan);
+            padding: 15px; font-family: 'Orbitron'; font-weight: bold; cursor: pointer;
+            transition: 0.3s; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%); margin-top: 10px;
+        }
+        .execute-btn:hover { background: var(--neon-cyan); color: black; box-shadow: 0 0 20px var(--neon-cyan); }
+        .content-area { padding: 20px; overflow-y: auto; position: relative; }
+        .log-panel-wrapper { position: relative; margin-top: 20px; }
+        .log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .log-panel {
+            background: rgba(0,0,0,0.95); border: 1px solid #222; border-radius: 8px;
+            height: 300px; overflow-y: auto; font-family: 'JetBrains Mono'; padding: 15px; font-size: 13px; user-select: text !important;
+        }
+        .log-line { margin-bottom: 5px; border-left: 2px solid #333; padding-left: 10px; line-height: 1.5; }
+        .log-line.info { color: var(--neon-cyan); }
+        .log-line.success { color: var(--neon-green); }
+        .log-line.error { color: var(--neon-alert); }
+
+        /* Modal Styles */
+        #folderModal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 100; padding: 50px; }
+        .modal-content { background: #111; border: var(--glass-border); max-width: 700px; margin: 0 auto; border-radius: 10px; padding: 20px; max-height: 80vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .folder-item { padding: 10px; border-bottom: 1px solid #222; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .folder-item:hover { background: rgba(0,243,255,0.1); color: var(--neon-cyan); }
+        .folder-actions { display: flex; gap: 10px; margin-bottom: 10px; }
+        .delete-btn { color: var(--neon-alert); cursor: pointer; font-size: 18px; padding: 2px 8px; }
+        .delete-btn:hover { background: rgba(255,0,85,0.2); border-radius: 4px; }
+
+        .scanline { width: 100%; height: 2px; background: rgba(0, 243, 255, 0.05); position: absolute; animation: scan 6s linear infinite; pointer-events: none; }
+        @keyframes scan { from { top: 0; } to { top: 100%; } }
+    </style>
+</head>
+<body>
+    <div id="folderModal">
+        <div class="modal-content">
+            <h2 style="font-family: Orbitron; color: var(--neon-cyan); font-size: 18px;">OUTPUT TARGET</h2>
+
+            <div class="folder-actions">
+                <input type="text" id="newFolderName" class="cyber-input" placeholder="New Folder Name..." style="flex:1;">
+                <button class="btn-icon" onclick="createFolder()"><i class="mdi mdi-folder-plus"></i> CREATE</button>
+            </div>
+
+            <div id="folderList" style="border: 1px solid #333; max-height: 400px; overflow-y: auto; margin-bottom: 10px;"></div>
+
+            <div style="display:flex; gap: 10px;">
+                <button class="execute-btn" style="flex:1; border-color: #444; color: #888;" onclick="closeModal()">CANCEL</button>
+                <button class="execute-btn" style="flex:1;" onclick="selectCurrentFolder()">SET THIS FOLDER</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="scanline"></div>
+    <div class="top-bar">
+        <div class="brand"><i class="mdi mdi-shield-sync"></i> NEURAL BATCH v3.1</div>
+        <div style="font-size: 12px; color: var(--neon-green); border: 1px solid var(--neon-green); padding: 2px 8px; border-radius: 4px;">SEQUENCER: ACTIVE</div>
+    </div>
+
+    <div class="main-layout">
+        <div class="control-panel">
+            <div class="input-group">
+                <label style="color: var(--neon-cyan); font-weight: bold; font-size: 13px;">TARGET DATA STREAM (1 Link/Line)</label>
+                <textarea id="targetUrl" class="cyber-input" rows="8" placeholder="Paste links here...&#10;Line 1 -> 1.mp4&#10;Line 2 -> 2.mp4"></textarea>
+            </div>
+
+            <div class="input-group">
+                <label style="color: var(--neon-cyan); font-weight: bold; font-size: 13px;">EXTRACTION MODE</label>
+                <select id="mode" class="cyber-input">
+                    <option value="best">Maximum Fidelity</option>
+                    <option value="video_only">Fixed MP4 Container</option>
+                    <option value="audio_mp3">Extract MP3 Neural</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label style="color: var(--neon-cyan); font-weight: bold; font-size: 13px;">OUTPUT DIRECTORY</label>
+                <div class="picker-group">
+                    <input type="text" id="outDir" class="cyber-input" value="default" readonly>
+                    <button class="btn-icon" onclick="openFolderBrowser()"><i class="mdi mdi-folder-search"></i></button>
+                </div>
+            </div>
+
+            <button class="execute-btn" onclick="runExtraction()" id="btn-run">
+                <i class="mdi mdi-play"></i> INITIATE BATCH
+            </button>
+        </div>
+
+        <div class="content-area">
+            <div class="log-panel-wrapper">
+                <div class="log-header">
+                    <span style="font-family: Orbitron; font-size: 14px; color: var(--neon-purple);">REAL-TIME TELEMETRY</span>
+                    <button onclick="copyLogs()" style="background:none; border: 1px solid #444; color: #888; font-size: 11px; cursor: pointer; border-radius: 4px; padding: 2px 10px;">
+                        <i class="mdi mdi-content-copy"></i> COPY LOGS
+                    </button>
+                </div>
+                <div class="log-panel" id="terminal">
+                    <div class="log-line info">> System boot complete. Batch mode ready.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const APP_ID = "universal_downloader";
+
+        function log(msg, type='info') {
+            const term = document.getElementById('terminal');
+            const time = new Date().toLocaleTimeString();
+            term.innerHTML += `<div class="log-line ${type}">[${time}] ${msg}</div>`;
+            term.scrollTop = term.scrollHeight;
+        }
+
+        function copyLogs() {
+            const term = document.getElementById('terminal');
+            navigator.clipboard.writeText(term.innerText).then(() => log("Telemetry copied.", "success"));
+        }
+
+        let currentPath = "";
+
+        async function openFolderBrowser() {
+            document.getElementById('folderModal').style.display = 'block';
+            await loadDir("");
+        }
+
+        async function loadDir(path) {
+            try {
+                const response = await fetch(`/api/v1/apps/execute/${APP_ID}/browse_directory`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path })
+                });
+                const data = await response.json();
+                if(data.error) return log(`FS Error: ${data.error}`, "error");
+
+                let html = '';
+                data.items.forEach(item => {
+                    if(item.name === '..') {
+                        html += `<div class="folder-item" onclick="loadDir('${item.path.replace(/\\/g, '\\\\')}')">
+                                    <div><i class="mdi mdi-arrow-up-bold"></i> .. (Up)</div>
+                                 </div>`;
+                        return;
+                    }
+                    let icon = item.type === "directory" ? "mdi-folder" : "mdi-file";
+                    let action = item.type === "directory" ? `onclick="loadDir('${item.path.replace(/\\/g, '\\\\')}')"` : "";
+                    let deleteBtn = `<i class="mdi mdi-delete delete-btn" onclick="deleteItem('${item.path.replace(/\\/g, '\\\\')}', event)"></i>`;
+                    html += `<div class="folder-item" ${action}>
+                                <div><i class="mdi ${icon}"></i> ${item.name}</div>
+                                ${deleteBtn}
+                             </div>`;
+                });
+
+                document.getElementById('folderList').innerHTML = html;
+                currentPath = data.current_path;
+            } catch(e) { log("FS Conn Error", "error"); }
+        }
+
+        async function createFolder() {
+            const name = document.getElementById('newFolderName').value;
+            if(!name) return;
+            try {
+                const res = await fetch(`/api/v1/apps/execute/${APP_ID}/create_folder`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ current_path: currentPath, folder_name: name })
+                });
+                const data = await res.json();
+                if(data.status === 'success') {
+                    log(`Folder Created: ${name}`, "success");
+                    document.getElementById('newFolderName').value = "";
+                    loadDir(currentPath);
+                } else { log(`Create Error: ${data.error}`, "error"); }
+            } catch(e) { log("Create Req Failed", "error"); }
+        }
+
+        async function deleteItem(path, event) {
+            event.stopPropagation();
+            if(!confirm("DELETE PERMANENTLY?")) return;
+            try {
+                const res = await fetch(`/api/v1/apps/execute/${APP_ID}/delete_item`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ target_path: path })
+                });
+                const data = await res.json();
+                if(data.status === 'success') {
+                    log(`Deleted: ${path}`, "info");
+                    loadDir(currentPath);
+                } else { log(`Delete Error: ${data.error}`, "error"); }
+            } catch(e) { log("Delete Req Failed", "error"); }
+        }
+
+        function selectCurrentFolder() {
+            document.getElementById('outDir').value = currentPath;
+            closeModal();
+            log(`Output Target Set: ${currentPath}`, "success");
+        }
+
+        function closeModal() { document.getElementById('folderModal').style.display = 'none'; }
+
+        let pollInterval = null;
+
+        async function startPolling(jobId) {
+            if(pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/v1/apps/execute/${APP_ID}/progress`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ job_id: jobId })
+                    });
+                    const data = await res.json();
+
+                    // CUSTOM LOGIC BUAT BATCH
+                    if(data.status === "downloading") {
+                        // Menampilkan status sequence
+                        log(`${data.speed} | ETA: ${data.eta}`, "info");
+                    } else if(data.status === "completed") {
+                        log(`✅ SEQUENCE FINISHED`, "success");
+                        clearInterval(pollInterval);
+                        document.getElementById('btn-run').disabled = false;
+                        document.getElementById('btn-run').innerText = "INITIATE BATCH";
+                    } else if(data.status === "error") {
+                        log(`❌ FAILED: ${data.error}`, "error");
+                        clearInterval(pollInterval);
+                        document.getElementById('btn-run').disabled = false;
+                        document.getElementById('btn-run').innerText = "INITIATE BATCH";
+                    }
+                } catch(e) { console.error("Poll error", e); }
+            }, 1000);
+        }
+
+        async function runExtraction() {
+            const url = document.getElementById('targetUrl').value;
+            if(!url) return log("CRITICAL: DATA STREAM MISSING", "error");
+
+            document.getElementById('btn-run').disabled = true;
+            document.getElementById('btn-run').innerText = "PROCESSING BATCH...";
+            log(`INITIATING BATCH SEQUENCE...`, "info");
+
+            try {
+                const response = await fetch(`/api/v1/apps/execute/${APP_ID}/quick_download`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        url,
+                        format_mode: document.getElementById('mode').value,
+                        output_folder: document.getElementById('outDir').value
+                    })
+                });
+
+                const result = await response.json();
+
+                if(result.status === "processing_started") {
+                    log(`COMMAND ACCEPTED. Job ID: ${result.job_id}`, "success");
+                    startPolling(result.job_id);
+                } else {
+                    log(`ENGINE FAILURE: ${result.error}`, "error");
+                    document.getElementById('btn-run').disabled = false;
+                }
+            } catch(e) {
+                log(`LINK ERROR: ${e.message}`, "error");
+                document.getElementById('btn-run').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

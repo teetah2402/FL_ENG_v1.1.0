@@ -1,0 +1,54 @@
+# ===================================================================
+# FLOWORK CORE - REQUIREMENTS (LITE EDITION)
+# ===================================================================
+# STRICT RULE: Hanya library System, Server, Database & Network.
+# NO AI ENGINE (Torch/Transformers) -> Install di Apps masing-masing.
+# ===================================================================
+
+# --- BUILD TOOLS (Penting buat compile library di Linux/Raspi) ---
+cmake
+ninja
+packaging
+wheel
+setuptools
+
+# --- SERVER & API (Jantung Core) ---
+# Kita kunci versi biar stabil sama code lu
+fastapi==0.104.1
+uvicorn==0.24.0
+python-multipart==0.0.6
+flask               # (Buat jaga-jaga kalau ada legacy code yg pake Flask)
+flask-cors
+werkzeug
+
+# --- NETWORK & GATEWAY (Jalur Komunikasi) ---
+python-socketio[asyncio_client]
+eventlet            # (Required by legacy SocketIO server/client)
+aiohttp             # Async HTTP Client
+requests            # Sync HTTP Client
+websockets          # WebSocket dasar
+
+# --- DATABASE & DATA (Penting buat DatabaseService) ---
+SQLAlchemy          # ORM Database Wajib
+flask-migrate       # Migrasi DB
+pydantic>=2.0.0     # Validasi Data (CRITICAL buat Manifest V2)
+msgpack             # Serialisasi data cepat
+toml                # Baca konfigurasi
+
+# --- SYSTEM & UTILS (Monitoring & File) ---
+psutil              # Monitor CPU/RAM (Heartbeat Gateway)
+python-dotenv       # Baca .env
+watchdog            # Hot-reload Apps baru
+aiofiles            # Baca file async
+python-dateutil     # Parsing tanggal
+cython              # Optimasi performance
+
+# --- SECURITY (Wajib buat Token/License) ---
+cryptography
+pycryptodome
+
+# --- OPTIONAL UTILS (Ringan & Berguna) ---
+# Kita keep yang enteng-enteng aja buat bantu Apps
+beautifulsoup4      # Parsing HTML ringan (berguna buat news_fetcher)
+trafilatura>=1.6.0  # Extract text ringan
+lxml>=4.9.0

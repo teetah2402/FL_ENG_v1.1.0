@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker World Clock</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0d0d;
+            --neon-green: #00ff41;
+            --neon-dim: #008f11;
+            --text-color: #e0e0e0;
+        }
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--neon-green);
+            font-family: 'Share Tech Mono', monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--neon-dim);
+            padding-bottom: 10px;
+        }
+        .title-bar {
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--neon-green);
+        }
+        .badge-cloud {
+            background: var(--neon-dim);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .status-text {
+            font-size: 0.7rem;
+            color: #555;
+            margin-left: 10px;
+        }
+        .clock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            width: 100%;
+            flex: 1;
+            align-content: center;
+            justify-items: center;
+            overflow-y: auto;
+        }
+        .clock-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 180px;
+            transition: transform 0.2s;
+        }
+        .clock-container:hover {
+            transform: scale(1.05);
+        }
+        canvas {
+            filter: drop-shadow(0 0 5px var(--neon-green));
+        }
+        .city-label {
+            margin-top: 10px;
+            font-size: 1rem;
+            color: var(--neon-green);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .time-digital {
+            font-size: 0.9rem;
+            color: var(--neon-dim);
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-area">
+        <div class="title-bar">/// GLOBAL_OPS_SYNC ///</div>
+        <div>
+            <span class="status-text" id="syncStatus">OFFLINE</span>
+            <span class="badge-cloud">CLOUD</span>
+        </div>
+    </div>
+
+    <div class="clock-grid" id="clockGrid">
+        </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        // Default zones if no save data found
+        const DEFAULT_ZONES = [
+            { city: 'New York', tz: 'America/New_York' },
+            { city: 'London', tz: 'Europe/London' },
+            { city: 'Berlin', tz: 'Europe/Berlin' },
+            { city: 'Jakarta', tz: 'Asia/Jakarta' },
+            { city: 'Tokyo', tz: 'Asia/Tokyo' }
+        ];
+
+        let activeZones = [...DEFAULT_ZONES];
+        let clocks = [];
+        let animationFrameId;
+
+        // --- CLOCK LOGIC ---
+
+        function createClock(zone, index) {
+            const container = document.createElement('div');
+            container.className = 'clock-container';
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 160;
+            canvas.height = 160;
+            canvas.id = `canvas-${index}`;
+
+            const label = document.createElement('div');
+            label.className = 'city-label';
+            label.innerText = zone.city;
+
+            const digital = document.createElement('div');
+            digital.className = 'time-digital';
+            digital.id = `digital-${index}`;
+            digital.innerText = "--:--";
+
+            container.appendChild(canvas);
+            container.appendChild(label);
+            container.appendChild(digital);
+            document.getElementById('clockGrid').appendChild(container);
+
+            return { canvas, ctx: canvas.getContext('2d'), zone: zone.tz, digitalEl: digital };
+        }
+
+        function initClocks() {
+            // Clear existing
+            const grid = document.getElementById('clockGrid');
+            grid.innerHTML = '';
+
+            // Create new based on activeZones state
+            clocks = activeZones.map((zone, i) => createClock(zone, i));
+        }
+
+        function drawClock(clock) {
+            const ctx = clock.ctx;
+            const now = new Date();
+
+            // Timezone Conversion
+            let timeString;
+            try {
+                timeString = now.toLocaleString('en-US', { timeZone: clock.zone });
+            } catch (e) {
+                // Fallback for invalid TZ
+                timeString = now.toLocaleString('en-US');
+            }
+            const targetTime = new Date(timeString);
+
+            const hours = targetTime.getHours();
+            const minutes = targetTime.getMinutes();
+            const seconds = targetTime.getSeconds();
+            const milliseconds = targetTime.getMilliseconds();
+
+            // Smooth seconds animation
+            const smoothSec = seconds + (milliseconds / 1000);
+            const smoothMin = minutes + (smoothSec / 60);
+            const smoothHour = hours + (smoothMin / 60);
+
+            // Update Digital Display
+            clock.digitalEl.innerText = targetTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+            // Drawing Logic (Hacker Style)
+            ctx.clearRect(0, 0, 160, 160);
+            const cx = 80;
+            const cy = 80;
+
+            // 1. Outer Rotating Ring
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(Date.now() / 1000 * 0.5);
+            ctx.strokeStyle = '#008f11';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 10]);
+            ctx.beginPath();
+            ctx.arc(0, 0, 75, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+
+            // 2. Inner Static Ring
+            ctx.beginPath();
+            ctx.arc(cx, cy, 65, 0, Math.PI * 2);
+            ctx.strokeStyle = '#00ff41';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // 3. Tick Marks
+            for (let i = 0; i < 12; i++) {
+                const angle = (i * 30) * Math.PI / 180;
+                const x1 = cx + Math.cos(angle) * 55;
+                const y1 = cy + Math.sin(angle) * 55;
+                const x2 = cx + Math.cos(angle) * 62;
+                const y2 = cy + Math.sin(angle) * 62;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.strokeStyle = '#00ff41';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            // 4. Hands
+            const hAngle = (smoothHour * 30 - 90) * Math.PI / 180;
+            drawHand(ctx, cx, cy, hAngle, 35, 4, '#00ff41');
+
+            const mAngle = (smoothMin * 6 - 90) * Math.PI / 180;
+            drawHand(ctx, cx, cy, mAngle, 50, 3, '#00ff41');
+
+            const sAngle = (smoothSec * 6 - 90) * Math.PI / 180;
+            drawHand(ctx, cx, cy, sAngle, 55, 1, '#fff'); // White second hand
+
+            // Center Dot
+            ctx.beginPath();
+            ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+        }
+
+        function drawHand(ctx, x, y, angle, length, width, color) {
+            const x2 = x + Math.cos(angle) * length;
+            const y2 = y + Math.sin(angle) * length;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+        }
+
+        function animate() {
+            clocks.forEach(drawClock);
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        // --- HYBRID BRIDGE PROTOCOL (The Magic Glue) ---
+        const syncStatusEl = document.getElementById('syncStatus');
+
+        window.addEventListener('message', (event) => {
+            const { type, payload } = event.data;
+
+            // 1. Handle LOAD Command (Received on Startup from Dashboard)
+            if (type === 'CMD_LOAD') {
+                console.log("[WorldClock] Loading configuration from engine...");
+                if (payload && payload.zones && Array.isArray(payload.zones)) {
+                    activeZones = payload.zones; // Restore saved zones
+                    syncStatusEl.innerText = "SYNCED";
+                    syncStatusEl.style.color = "#00ff41";
+                } else {
+                    syncStatusEl.innerText = "DEFAULT";
+                }
+                initClocks(); // Re-render with loaded data
+            }
+
+            // 2. Handle SAVE Command (Received when user clicks 'Save State')
+            if (type === 'CMD_SAVE') {
+                console.log("[WorldClock] Sending configuration to engine...");
+
+                // Pack the current state and send back
+                event.source.postMessage({
+                    type: 'WIDGET_SAVE_REQUEST',
+                    payload: {
+                        data: {
+                            zones: activeZones, // Save the array of zones
+                            last_sync: Date.now()
+                        }
+                    }
+                }, '*');
+            }
+        });
+
+        // Start initialization
+        initClocks();
+        animate();
+
+    </script>
+</body>
+</html>

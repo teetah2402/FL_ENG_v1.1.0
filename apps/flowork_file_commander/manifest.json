@@ -1,0 +1,24 @@
+{
+  "id": "flowork_file_commander",
+  "name": "File Commander",
+  "version": "1.0.0",
+  "description": "Secure file management utility with strict sandboxing.",
+  "author": "Flowork System",
+  "category": "tools",
+  "capability": "offline",
+  "tier": "utility",
+  "icon": "icon.svg",
+  "gui": {
+    "dashboard_enabled": true,
+    "dashboard_path": "index.html",
+    "is_standalone": true,
+    "settings": []
+  },
+  "nodes": [],
+  "permissions": [
+    "filesystem_access",
+    "sandboxing"
+  ],
+  "requires_services": [],
+  "is_paused": false
+}

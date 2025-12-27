@@ -1,0 +1,82 @@
+{
+  "id": "golden_moment_clipper",
+  "name": "Golden Moment Studio",
+  "version": "3.0.0",
+  "description": "AI-powered video clipper factory. Auto-detect highlights, smart crop, and karaoke subtitles.",
+  "author": "Flowork Cyber Division",
+  "author_url": "https://flowork.cloud",
+  "category": "media_graphics",
+  "capability": "offline",
+
+  "tier": "architect",
+  "icon": "icon.svg",
+  "gui": {
+    "dashboard_enabled": true,
+    "dashboard_path": "index.html",
+    "is_standalone": true,
+    "settings": [
+      {
+        "name": "default_export_format",
+        "type": "select",
+        "label": "Default Export",
+        "options": ["mp4", "mkv", "mov"],
+        "default": "mp4"
+      }
+    ]
+  },
+
+  "nodes": [
+    {
+      "id": "golden_clipper_process",
+      "label": "Golden Clipper",
+      "name": "Golden Clipper",
+      "description": "Process videos based on timestamps and AI settings.",
+      "type": "action",
+      "icon": "icon.svg",
+      "category": "video_processing",
+      "handler_type": "python",
+      "python_handler": "backend.node:GoldenClipperNode",
+      "inputs": [
+        {
+          "name": "input_folder_path",
+          "label": "Source Video Folder",
+          "type": "text",
+          "placeholder": "/path/to/source",
+          "required": true,
+          "default": ""
+        },
+        {
+          "name": "output_folder",
+          "label": "Output Destination",
+          "type": "text",
+          "placeholder": "/path/to/output",
+          "required": true,
+          "default": ""
+        },
+        {
+          "name": "timestamps",
+          "label": "Timestamps Config",
+          "type": "code",
+          "description": "Format: 00:00:10-00:00:30|label",
+          "placeholder": "00:00:10-00:00:30|highlight",
+          "default": ""
+        }
+      ],
+      "input_ports": [
+        { "name": "trigger_in", "type": "signal" }
+      ],
+      "output_ports": [
+        { "name": "on_success", "type": "signal", "label": "Success" },
+        { "name": "on_error", "type": "signal", "label": "Error" }
+      ]
+    }
+  ],
+  "permissions": [
+    "filesystem_access",
+    "vram_isolation",
+    "background_task",
+    "gpu_compute"
+  ],
+  "requires_services": ["ai_provider_manager_service"],
+  "is_paused": false
+}

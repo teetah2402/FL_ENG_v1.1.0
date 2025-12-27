@@ -1,0 +1,41 @@
+{
+  "id": "video-player",
+  "name": "Video Player",
+  "version": "2.2.0",
+  "description": "Tactical video operations terminal. Zero-upload local player with folder access and neural sync.",
+  "author": "Flowork Cyber Division",
+  "author_url": "https://flowork.cloud",
+  "category": "media_graphics",
+  "capability": "online",
+  "tier": "free",
+  "icon": "icon.svg",
+  "gui": {
+    "dashboard_enabled": true,
+    "dashboard_path": "index.html",
+    "is_standalone": true,
+    "settings": [
+      {
+        "name": "default_playback_speed",
+        "type": "number",
+        "label": "Playback Speed",
+        "default": 1.0
+      },
+      {
+        "name": "neural_sync_enabled",
+        "type": "boolean",
+        "label": "Neural Sync",
+        "default": true
+      }
+    ]
+  },
+  "nodes": [],
+  "permissions": [
+    "local_folder_access",
+    "video_processing",
+    "cloud_sync",
+    "offline_ready",
+    "filesystem_read"
+  ],
+  "requires_services": [],
+  "is_paused": false
+}

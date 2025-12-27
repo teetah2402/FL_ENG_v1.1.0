@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Model Canvas (Wrapper Fix)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #1e1e2e;
+            --card-bg: #2a2a3c;
+            --text-color: #e0e0e0;
+            --accent-color: #00f5ff;
+            --border-color: #444;
+            --note-bg: #fff9c4;
+            --note-text: #333;
+            --danger: #ff4d4d;
+        }
+        body {
+            margin: 0; padding: 20px; font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color); color: var(--text-color);
+            height: 100vh; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden;
+        }
+        .title-bar { text-align: center; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .title-bar h2 { margin: 0; color: var(--accent-color); font-weight: 600; }
+        .toolbar { display: flex; gap: 10px; }
+
+        button, .upload-btn {
+            background-color: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color);
+            padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: 0.2s;
+            display: flex; align-items: center; gap: 5px;
+        }
+        button:hover, .upload-btn:hover { background-color: #3a3a4c; border-color: var(--accent-color); }
+        .btn-save-manual { background-color: #ffbd2e; color: #000; border: none; font-weight: 600; }
+        .btn-export { background-color: #2eff77; color: #000; border: none; font-weight: 600; }
+
+        /* Grid */
+        .grid-container {
+            display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr);
+            gap: 10px; flex-grow: 1; overflow: auto; border: 2px solid var(--border-color);
+            background-color: var(--border-color); border-radius: 8px;
+        }
+        .block {
+            background-color: var(--card-bg); padding: 10px; display: flex; flex-direction: column;
+            min-height: 0; position: relative;
+        }
+        .block h3 { margin: 0 0 10px 0; font-size: 0.9rem; text-transform: uppercase; color: #888; user-select: none; }
+        .block-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-bottom: 40px; }
+
+        /* --- [FIX] WRAPPER PATTERN STYLING --- */
+        .note-wrapper {
+            background-color: var(--note-bg);
+            color: var(--note-text);
+            border-radius: 4px;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+            min-height: 30px;
+        }
+
+        .note-wrapper:hover {
+            z-index: 5;
+        }
+
+        .note-text {
+            padding: 8px 25px 8px 8px; /* Kanan dikasih space buat tombol X */
+            min-height: 20px;
+            font-size: 0.9rem;
+            outline: none;
+            word-break: break-word;
+            cursor: text;
+        }
+
+        .note-text:empty:before {
+            content: "Type here...";
+            color: #888;
+            font-style: italic;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 20px;
+            height: 20px;
+            background: rgba(0,0,0,0.05);
+            border: none;
+            color: #555;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.2s;
+        }
+
+        .note-wrapper:hover .delete-btn { opacity: 1; }
+        .delete-btn:hover { background-color: var(--danger); color: white; }
+
+        /* Add Button */
+        .add-btn-float {
+            position: absolute; bottom: 10px; right: 10px; width: 32px; height: 32px;
+            border-radius: 50%; background-color: var(--accent-color); color: black;
+            border: none; font-size: 20px; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3); z-index: 10;
+        }
+        .add-btn-float:hover { transform: scale(1.1); background-color: white; }
+
+        /* Grid Areas */
+        #kp { grid-area: 1 / 1 / 3 / 2; } #ka { grid-area: 1 / 2 / 2 / 3; } #kr { grid-area: 2 / 2 / 3 / 3; }
+        #vp { grid-area: 1 / 3 / 3 / 4; } #cr { grid-area: 1 / 4 / 2 / 5; } #ch { grid-area: 2 / 4 / 3 / 5; }
+        #cs { grid-area: 1 / 5 / 3 / 6; } #cst { grid-area: 3 / 1 / 4 / 3; } #rs { grid-area: 3 / 3 / 4 / 6; }
+
+        .toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background-color: var(--accent-color); color: black; padding: 10px 20px;
+            border-radius: 20px; font-weight: 600; opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; z-index: 100;
+        }
+        .toast.show { opacity: 1; }
+        .toast.error { background-color: var(--danger); color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="title-bar">
+        <h2>Business Model Canvas</h2>
+        <div class="toolbar">
+            <button onclick="downloadAsImage()" class="btn-export">📸 Export PNG</button>
+            <button onclick="downloadProjectFile()" class="btn-save-manual">💾 Backup JSON</button>
+            <label class="upload-btn">
+                📂 Load
+                <input type="file" id="jsonUpload" accept=".json" style="display: none;" onchange="loadProjectFile(this)">
+            </label>
+            <button onclick="forceSave()" title="Force Sync to Engine">☁️ Sync</button>
+        </div>
+    </div>
+
+    <div class="grid-container" id="canvasArea">
+        <div class="block" id="kp"><h3>Key Partners</h3><div class="block-content" id="list-kp"></div><button class="add-btn-float" onclick="addNote('list-kp')">+</button></div>
+        <div class="block" id="ka"><h3>Key Activities</h3><div class="block-content" id="list-ka"></div><button class="add-btn-float" onclick="addNote('list-ka')">+</button></div>
+        <div class="block" id="kr"><h3>Key Resources</h3><div class="block-content" id="list-kr"></div><button class="add-btn-float" onclick="addNote('list-kr')">+</button></div>
+        <div class="block" id="vp"><h3>Value Propositions</h3><div class="block-content" id="list-vp"></div><button class="add-btn-float" onclick="addNote('list-vp')">+</button></div>
+        <div class="block" id="cr"><h3>Customer Relationships</h3><div class="block-content" id="list-cr"></div><button class="add-btn-float" onclick="addNote('list-cr')">+</button></div>
+        <div class="block" id="ch"><h3>Channels</h3><div class="block-content" id="list-ch"></div><button class="add-btn-float" onclick="addNote('list-ch')">+</button></div>
+        <div class="block" id="cs"><h3>Customer Segments</h3><div class="block-content" id="list-cs"></div><button class="add-btn-float" onclick="addNote('list-cs')">+</button></div>
+        <div class="block" id="cst"><h3>Cost Structure</h3><div class="block-content" id="list-cst"></div><button class="add-btn-float" onclick="addNote('list-cst')">+</button></div>
+        <div class="block" id="rs"><h3>Revenue Streams</h3><div class="block-content" id="list-rs"></div><button class="add-btn-float" onclick="addNote('list-rs')">+</button></div>
+    </div>
+
+    <div id="toast" class="toast">Saved!</div>
+
+    <script>
+        const DATA_KEY = 'business_canvas_data';
+
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                const later = () => { clearTimeout(timeout); func(...args); };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // --- CORE LOGIC: WRAPPER PATTERN ---
+        function addNote(blockId, text = '') {
+            try {
+                const container = document.getElementById(blockId);
+
+                // 1. Create Wrapper
+                const wrapper = document.createElement('div');
+                wrapper.className = 'note-wrapper';
+
+                // 2. Create Editable Area (TERPISAH)
+                const textDiv = document.createElement('div');
+                textDiv.className = 'note-text';
+                textDiv.contentEditable = true;
+                textDiv.spellcheck = false;
+                textDiv.innerText = text;
+
+                // 3. Create Delete Button (TERPISAH)
+                const delBtn = document.createElement('button');
+                delBtn.className = 'delete-btn';
+                delBtn.innerHTML = '×';
+                delBtn.onclick = (e) => {
+                    e.preventDefault(); // Stop focus stealing
+                    if(confirm("Hapus note ini?")) {
+                        wrapper.remove();
+                        hybridSave();
+                    }
+                };
+
+                // 4. Assemble
+                wrapper.appendChild(textDiv);
+                wrapper.appendChild(delBtn);
+                container.appendChild(wrapper);
+
+                // 5. Focus Logic
+                if (!text) {
+                    setTimeout(() => textDiv.focus(), 10);
+                }
+
+                // 6. Listeners
+                textDiv.addEventListener('input', hybridSave);
+
+                // Tambahan: Save on blur (kalo user klik keluar)
+                textDiv.addEventListener('blur', hybridSave);
+
+            } catch (e) {
+                console.error("Add Note Error:", e);
+                alert("Error adding note!");
+            }
+        }
+
+        function getCanvasData() {
+            const data = {};
+            const blocks = ['list-kp', 'list-ka', 'list-kr', 'list-vp', 'list-cr', 'list-ch', 'list-cs', 'list-cst', 'list-rs'];
+
+            blocks.forEach(id => {
+                const container = document.getElementById(id);
+                const notes = [];
+                // Ambil text cuma dari .note-text, abaikan tombol
+                container.querySelectorAll('.note-text').forEach(div => {
+                    const text = div.innerText.trim();
+                    if(text) notes.push(text);
+                });
+                data[id] = notes;
+            });
+            return data;
+        }
+
+        function renderCanvas(data) {
+            if (!data) return;
+            const blocks = ['list-kp', 'list-ka', 'list-kr', 'list-vp', 'list-cr', 'list-ch', 'list-cs', 'list-cst', 'list-rs'];
+            blocks.forEach(id => { document.getElementById(id).innerHTML = ''; });
+            for (const [id, notes] of Object.entries(data)) {
+                if (blocks.includes(id) && Array.isArray(notes)) {
+                    notes.forEach(text => addNote(id, text));
+                }
+            }
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.className = 'toast show ' + type;
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // --- EXPORT TOOLS ---
+        function downloadAsImage() {
+            if (typeof html2canvas === 'undefined') {
+                alert("Mode Offline: Library Export belum ter-cache. Connect internet sebentar lalu refresh.");
+                return;
+            }
+            const canvasArea = document.getElementById('canvasArea');
+            showToast("Rendering...", "success");
+            html2canvas(canvasArea, { backgroundColor: "#1e1e2e", scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'BMC_Export.png';
+                link.href = canvas.toDataURL();
+                link.click();
+                showToast("Done!");
+            }).catch(e => showToast("Export Error", "error"));
+        }
+
+        function downloadProjectFile() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(getCanvasData(), null, 2));
+            const node = document.createElement('a');
+            node.setAttribute("href", dataStr);
+            node.setAttribute("download", "bmc_backup.json");
+            document.body.appendChild(node);
+            node.click();
+            node.remove();
+        }
+
+        function loadProjectFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    renderCanvas(JSON.parse(e.target.result));
+                    hybridSave();
+                    showToast("Loaded!");
+                } catch (err) { alert("File JSON tidak valid"); }
+                input.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        // --- HYBRID SAVE (OFFLINE-PROOF) ---
+        const hybridSave = debounce(() => {
+            const data = getCanvasData();
+            // 1. LocalStorage (Primary for Offline)
+            try { localStorage.setItem('backup_' + DATA_KEY, JSON.stringify(data)); } catch(e){}
+
+            // 2. Engine (Optional)
+            if (window.parent) {
+                try {
+                    window.parent.postMessage({ type: 'WIDGET_SAVE_REQUEST', payload: { key: DATA_KEY, data: data } }, '*');
+                } catch(e) {} // Silent fail kalau engine mati
+            }
+        }, 1000);
+
+        function forceSave() { hybridSave(); showToast("Syncing..."); }
+
+        // --- INIT ---
+        window.onload = () => {
+            const localData = localStorage.getItem('backup_' + DATA_KEY);
+            if (localData) try { renderCanvas(JSON.parse(localData)); } catch(e){}
+
+            window.addEventListener('message', (event) => {
+                if (event.data?.type === 'CMD_LOAD') renderCanvas(event.data.payload);
+            });
+        };
+    </script>
+</body>
+</html>
