@@ -1,0 +1,28 @@
+{
+    "id": "flowork_file_commander",
+    "name": "File Commander",
+    "version": "3.0.0",
+    "description": "Secure file management utility powered by Muscle.",
+    "category": "apps",
+    "type": "apps",
+    "author": "Flowork System",
+    "tier": "utility",
+    "entry_point": "main.py",
+    "runtime": "python",
+    "permissions": [
+        "filesystem.read",
+        "filesystem.write"
+    ],
+    "gui": {
+        "enabled": true,
+        "dashboard_path": "index.html",
+        "icon": "mdi-harddisk"
+    },
+    "nodes": [],
+    "capabilities": ["filesystem_access", "sandboxing"],
+    "tags": ["utility", "system", "files"],
+    "provided_services": [
+        "file_management",
+        "file_browser"
+    ]
+}

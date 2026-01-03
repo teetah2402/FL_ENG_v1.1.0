@@ -1,0 +1,70 @@
+{
+  "id": "flowork_architect",
+  "name": "Flowork Cortex",
+  "version": "3.1.0",
+  "description": "Neural Architecture Mapper & Zombie File Hunter (Muscle Powered)",
+  "category": "developer_tools",
+  "type": "apps",
+  "author": "Flowork Inc.",
+  "tier": "architect",
+  "entry_point": "main.py",
+  "runtime": "python",
+  "permissions": [
+    "filesystem.read",
+    "filesystem.write",
+    "core.access"
+  ],
+  "gui": {
+    "enabled": true,
+    "dashboard_path": "index.html",
+    "icon": "mdi-brain"
+  },
+  "nodes": [],
+  "display": "standalone",
+  "theme_color": "#00ffff",
+  "provided_services": [
+    "project_scaffolding",
+    "code_analysis",
+    "zombie_hunter"
+  ],
+  "is_system": true,
+  "properties": [
+    {
+      "name": "scan_root_path",
+      "label": "Root Scan Path",
+      "type": "string",
+      "default": "/master_workspace",
+      "placeholder": "/app/data"
+    },
+    {
+      "name": "auto_delete_zombies",
+      "label": "Auto Delete Zombies",
+      "type": "boolean",
+      "default": false,
+      "description": "If enabled, zombie files will be removed automatically during scheduled scans."
+    },
+    {
+      "name": "analysis_depth",
+      "label": "Scan Depth",
+      "type": "select",
+      "options": [
+        "shallow",
+        "deep",
+        "recursive"
+      ],
+      "default": "deep"
+    }
+  ],
+  "schedules": [
+    {
+      "cron": "0 3 * * 0",
+      "action": "zombie_hunter_job",
+      "params": {
+        "mode": "scheduled_maintenance"
+      }
+    }
+  ],
+  "system_dependencies": [
+    "tree"
+  ]
+}
