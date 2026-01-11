@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Evolution | Flowork Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --accent: #6366f1; --bg: #020617; }
+        body { background-color: var(--bg); font-family: 'Plus Jakarta Sans', sans-serif; color: #f1f5f9; overflow: hidden; }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .terminal-font { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <header class="h-16 border-b border-white/5 flex items-center justify-between px-8 shrink-0 glass z-50">
+        <div class="flex items-center gap-4">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
+                <span class="font-black text-xs">NX</span>
+            </div>
+            <h1 class="text-sm font-black italic uppercase tracking-tighter">Nexus<span class="text-indigo-500">Evolution</span></h1>
+        </div>
+        <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+            <span class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">Neural Link Active</span>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+
+        <aside class="w-[340px] glass border-r border-white/5 p-6 flex flex-col gap-6 overflow-y-auto shrink-0">
+            <div class="space-y-4">
+                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">App Identity</label>
+                <input id="app-id" type="text" placeholder="my_new_app" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-indigo-500">
+
+                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Cognitive Core</label>
+                <select id="model-select" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none cursor-pointer">
+                    <option value="gpt-4o">GPT-4o (Architect)</option>
+                    <option value="deepseek-chat">DeepSeek V3 (Logical)</option>
+                    <option value="gemini-2.0-flash-exp">Gemini 2.0 (Fast)</option>
+                </select>
+            </div>
+
+            <div class="space-y-4 pt-4 border-t border-white/5">
+                <label class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Evolution Command</label>
+                <textarea id="ai-prompt" rows="5" placeholder="What should evolve?" class="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-xs resize-none outline-none focus:border-indigo-500"></textarea>
+                <button onclick="askAI()" id="ai-btn" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">
+                    Generate Evolution Bundle
+                </button>
+            </div>
+
+            <div id="fix-zone" class="hidden p-5 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl space-y-3">
+                <p class="text-[10px] text-slate-400 italic">Logs captured. Run self-correction?</p>
+                <button onclick="autoFix()" class="w-full py-2 bg-emerald-600 rounded-lg font-bold text-[9px] uppercase">Initiate Self-Fix</button>
+            </div>
+
+            <button onclick="startBuild()" id="build-btn" class="w-full py-5 bg-white text-slate-950 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all hover:bg-indigo-500 hover:text-white mt-auto">
+                Construct Application
+            </button>
+        </aside>
+
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <div class="h-10 border-b border-white/5 flex items-center px-6 bg-slate-950/30">
+                <span id="file-path" class="text-[10px] font-mono text-slate-500 italic">Neural Buffer: Empty</span>
+            </div>
+
+            <div class="flex-1 relative">
+                <textarea id="app-desc" spellcheck="false"
+                          class="absolute inset-0 w-full h-full bg-transparent p-12 outline-none text-emerald-400 terminal-font leading-relaxed resize-none overflow-y-auto"
+                          placeholder="// Waiting for neural matrix signal..."></textarea>
+            </div>
+
+            <footer class="h-48 bg-black border-t border-white/5 flex flex-col shrink-0">
+                <div class="px-6 py-2 border-b border-white/5 bg-white/5 flex justify-between">
+                    <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Console Output</span>
+                    <button onclick="document.getElementById('log-display').innerHTML=''" class="text-[8px] text-slate-600 uppercase font-bold">Clear</button>
+                </div>
+                <div id="log-display" class="flex-1 overflow-y-auto p-4 terminal-font text-slate-400 space-y-1">
+                    <p class="text-indigo-500/50">> Evolution Engine V4.2 Online.</p>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        let currentBundle = null;
+
+        const log = (msg, type = 'info') => {
+            const colors = { info: 'text-slate-500', success: 'text-emerald-400', error: 'text-red-500', evolution: 'text-indigo-400 font-bold' };
+            const div = document.getElementById('log-display');
+            div.innerHTML += `<p class="${colors[type]}">> [${new Date().toLocaleTimeString()}] ${msg}</p>`;
+            div.scrollTop = div.scrollHeight;
+        };
+
+        async function askAI() {
+            const prompt = document.getElementById('ai-prompt').value.trim();
+            const model = document.getElementById('model-select').value;
+            const editor = document.getElementById('app-desc');
+            const btn = document.getElementById('ai-btn');
+
+            if(!prompt) return alert("Command empty.");
+
+            log(`ARCHITECT: Synthesizing with ${model}...`, 'evolution');
+            btn.disabled = true;
+            editor.value = "// HANDSHAKING WITH NEURAL MATRIX...";
+
+            try {
+                const res = await fetch('/api/v1/apps/execute/app_builder/ask_ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt, model: model })
+                });
+                const result = await res.json();
+
+                if(result.status === 'success') {
+                    if(result.app_bundle) {
+                        currentBundle = result.app_bundle;
+                        // [FIXED] Hindari undefined dengan fallback string kosong
+                        editor.value = currentBundle.main_logic_py || "// Empty logic received.";
+                        document.getElementById('file-path').innerText = "Buffer: backend/logic/main_logic.py";
+                        log("ARCHITECT: Bundle synthesized successfully.", "success");
+                    } else {
+                        currentBundle = null;
+                        editor.value = result.code_suggestion || "// AI returned raw garbage.";
+                        document.getElementById('file-path').innerText = "Buffer: raw_suggestion.py";
+                        log("ARCHITECT: Received raw logic (Partial).", "info");
+                    }
+                } else {
+                    log(`ERROR: ${result.message}`, 'error');
+                    editor.value = `// ARCHITECT_ERROR: ${result.message}`;
+                }
+            } catch (e) { log(`CRITICAL: ${e.message}`, 'error'); }
+            finally { btn.disabled = false; }
+        }
+
+        async function startBuild() {
+            const appId = document.getElementById('app-id').value.trim();
+            const desc = document.getElementById('app-desc').value.trim();
+            const btn = document.getElementById('build-btn');
+
+            if(!appId) return alert("App ID missing.");
+
+            log(`SCAFFOLD: Constructing ${appId}...`, "evolution");
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/v1/apps/execute/app_builder/build_app', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ app_id: appId, description: desc, bundle: currentBundle })
+                });
+                const result = await res.json();
+
+                if(result.status === 'success') {
+                    log(`SUCCESS: ${appId} synthesized.`, 'success');
+                    document.getElementById('fix-zone').classList.remove('hidden');
+                } else {
+                    log(`FAILED: ${result.message}`, 'error');
+                }
+            } catch (e) { log(`CRITICAL: ${e.message}`, 'error'); }
+            finally { btn.disabled = false; }
+        }
+
+        async function autoFix() {
+            const appId = document.getElementById('app-id').value;
+            log(`SELF_FIX: Analyzing logs for ${appId}...`, "evolution");
+            try {
+                const res = await fetch('/api/v1/apps/execute/app_builder/get_logs', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ app_id: appId })
+                });
+                const data = await res.json();
+                if(data.logs) {
+                    document.getElementById('ai-prompt').value = `APP_ERROR_LOG:\n${data.logs}\n\nFIX THIS NOW. Provide a new JSON bundle.`;
+                    await askAI();
+                } else { log("No logs found.", "info"); }
+            } catch(e) { log("Fix failed: " + e.message, "error"); }
+        }
+    </script>
+</body>
+</html>

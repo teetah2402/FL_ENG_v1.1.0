@@ -1,0 +1,4 @@
+# Standard Python libraries (os, json, inspect, asyncio, importlib)
+# TIDAK BOLEH ditaruh di sini karena sudah built-in.
+# Taruh library pihak ketiga (pip) di bawah ini jika nanti butuh:
+# requests>=2.31.0

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flowork Studio | Neural Scaffolder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; font-family: 'Inter', sans-serif; color: #f8fafc; }
+        .editor-bg { background-color: #020617; }
+        .sidebar { background-color: #1e293b; border-right: 1px solid #334155; }
+        .terminal { background-color: #000000; border-top: 1px solid #334155; }
+        .custom-input { background: #0f172a !important; border: 1px solid #334155 !important; color: #f8fafc !important; }
+        .custom-input:focus { border-color: #6366f1 !important; outline: none; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
+        .accent-btn { background: #6366f1; transition: all 0.2s; }
+        .accent-btn:hover:not(:disabled) { background: #4f46e5; transform: translateY(-1px); }
+        .accent-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex flex-col">
+
+    <header class="h-14 border-b border-slate-700 bg-slate-900 px-6 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center font-black text-xs shadow-lg shadow-indigo-500/20">FL</div>
+            <h1 class="text-sm font-bold tracking-tight uppercase italic">Flowork <span class="text-indigo-400">Studio</span></h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <div id="status-link" class="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">Neural Link Active</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+
+        <aside class="sidebar w-80 p-6 flex flex-col gap-8 shrink-0 overflow-y-auto">
+            <div class="space-y-6">
+                <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Deployment Config</h2>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">Application ID</label>
+                    <input id="app-id" type="text" placeholder="e.g. crypto_tracker"
+                           class="custom-input w-full p-3 rounded-lg text-sm font-semibold">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">Intelligence Model</label>
+                    <select id="model-select" class="custom-input w-full p-3 rounded-lg text-sm cursor-pointer">
+                        <option value="gpt-4o">GPT-4o (Reasoning)</option>
+                        <option value="deepseek-chat">DeepSeek V3 (Fast)</option>
+                        <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-4 pt-6 border-t border-slate-700/50">
+                <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Neural Architect</h2>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">Prompt Logic</label>
+                    <textarea id="ai-prompt" rows="5" placeholder="Describe app functionality..."
+                              class="custom-input w-full p-3 rounded-lg text-xs resize-none leading-relaxed"></textarea>
+                </div>
+                <button onclick="askAI()" id="ai-btn" class="accent-btn w-full py-3 rounded-lg font-bold text-[10px] uppercase tracking-widest shadow-lg">
+                    Generate Logic
+                </button>
+            </div>
+
+            <div class="mt-auto pt-6">
+                <button onclick="startBuild()" id="build-btn" class="w-full py-4 bg-white text-slate-900 hover:bg-indigo-500 hover:text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all">
+                    Construct App
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col overflow-hidden editor-bg">
+            <div class="px-6 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Editor:</span>
+                    <span class="text-[10px] font-medium text-slate-400 font-mono">backend/logic/main_logic.py</span>
+                </div>
+                <div class="flex gap-1.5">
+                    <div class="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
+                </div>
+            </div>
+
+            <div class="flex-1 relative overflow-hidden">
+                <textarea id="app-desc" spellcheck="false"
+                          class="absolute inset-0 w-full h-full bg-transparent p-10 outline-none text-emerald-400 font-mono text-xs leading-relaxed resize-none"
+                          placeholder="# Awaiting signal from Neural Architect..."></textarea>
+            </div>
+
+            <footer class="h-48 terminal flex flex-col shrink-0">
+                <div class="px-4 py-2 border-b border-slate-800 flex items-center justify-between">
+                    <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Process Log</span>
+                    <button onclick="clearLogs()" class="text-[8px] text-slate-600 hover:text-white uppercase font-bold tracking-tighter">Clear</button>
+                </div>
+                <div id="log-display" class="flex-1 overflow-y-auto p-4 font-mono text-[10px] space-y-1">
+                    <p class="text-indigo-500">> [SYSTEM] Booting scaffolding sequence...</p>
+                    <p class="text-slate-600">> [INFO] Standing by for instructions.</p>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        const log = (msg, type = 'info') => {
+            const colors = {
+                info: 'text-slate-500',
+                success: 'text-emerald-400',
+                error: 'text-red-500 font-bold',
+                warn: 'text-amber-500'
+            };
+            const div = document.getElementById('log-display');
+            div.innerHTML += `<p class="${colors[type]}">> [${new Date().toLocaleTimeString()}] ${msg}</p>`;
+            div.scrollTop = div.scrollHeight;
+        };
+
+        function clearLogs() {
+            document.getElementById('log-display').innerHTML = '<p class="text-slate-600">> Terminal cleared.</p>';
+        }
+
+        async function askAI() {
+            const prompt = document.getElementById('ai-prompt').value.trim();
+            const model = document.getElementById('model-select').value;
+            const editor = document.getElementById('app-desc');
+            const btn = document.getElementById('ai-btn');
+
+            if(!prompt) return alert("Describe the evolution first.");
+
+            log(`ARCHITECT: Synthesizing with ${model}...`, 'evolution');
+            btn.disabled = true;
+            editor.value = "// ANALYZING NEURAL BUNDLE...";
+
+            try {
+                const res = await fetch('/api/v1/apps/execute/app_builder/ask_ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt, model: model })
+                });
+                const result = await res.json();
+
+                // DEBUG: Lihat isi asli di Inspect Element > Console
+                console.log("AI_RESPONSE_DEBUG:", result);
+
+                if(result.status === 'success') {
+                    if(result.app_bundle) {
+                        currentBundle = result.app_bundle;
+                        // [SAFE ACCESS] Menggunakan operator OR untuk menghindari undefined
+                        editor.value = currentBundle.main_logic_py || "// AI generated empty logic.";
+                        document.getElementById('file-path').innerText = "backend/logic/main_logic.py";
+                        log("ARCHITECT: Evolution bundle synthesized.", "success");
+                    }
+                    else if (result.code_suggestion) {
+                        currentBundle = null;
+                        editor.value = result.code_suggestion || "// No content received.";
+                        document.getElementById('file-path').innerText = "raw_code.py";
+                        log("ARCHITECT: Raw logic suggestion received.", "info");
+                    }
+                } else {
+                    log(`ERROR: ${result.message}`, 'error');
+                    editor.value = `// ERROR: ${result.message}`;
+                }
+            } catch (e) {
+                log(`CRITICAL: ${e.message}`, 'error');
+                editor.value = `// CRITICAL_FAULT: ${e.message}`;
+            }
+            finally {
+                btn.disabled = false;
+                btn.innerText = "Generate Evolution Bundle";
+            }
+        }
+        async function startBuild() {
+            const appId = document.getElementById('app-id').value.trim();
+            const desc = document.getElementById('app-desc').value.trim();
+            const btn = document.getElementById('build-btn');
+
+            if(!appId) return alert("App ID is required.");
+            if(!desc || desc.includes("BUILD_ERROR")) return log("Invalid logic: Cannot construct application.", "error");
+
+            log(`Engaging scaffolding protocol for: ${appId}...`);
+            btn.disabled = true;
+            btn.innerText = "Synthesizing...";
+
+            try {
+                const res = await fetch('/api/v1/apps/execute/app_builder/build_app', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ app_id: appId, description: desc })
+                });
+                const result = await res.json();
+                if(result.status === 'success') {
+                    log(`Deployment success: Application ${appId} is online.`, 'success');
+                    btn.innerText = "Build Complete";
+                    btn.style.background = "#10b981";
+                    btn.style.color = "white";
+                } else {
+                    log(`Deployment failed: ${result.message}`, 'error');
+                }
+            } catch (e) { log(`Critical Scaffolding Fault: ${e.message}`, 'error'); }
+            finally {
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerText = "Construct App";
+                    btn.style.background = "white";
+                    btn.style.color = "#0f172a";
+                }, 4000);
+            }
+        }
+    </script>
+</body>
+</html>
